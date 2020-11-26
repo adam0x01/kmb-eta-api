@@ -1,8 +1,12 @@
 service: aws-node-puppeteer
 provider:
   name: aws
+  stage: dev
   profile: default
   runtime: nodejs12.x
+  region: ap-east-1
+  apiGateway:
+    shouldStartNameWithService: true
 
 plugins:
   - serverless-offline
@@ -15,7 +19,7 @@ package:
 functions:
   hello:
     handler: handler.hello
-    memorySize: 1536MB
+    memorySize: 2048
     timeout: 30
     events:
       - http:
