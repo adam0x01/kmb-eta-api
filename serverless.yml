@@ -17,7 +17,7 @@ plugins:
 #     - node_modules/puppeteer/.local-chromium/**
 
 functions:
-  eta:
+  getEta:
     handler: handler.main
     memorySize: 2048
     timeout: 30

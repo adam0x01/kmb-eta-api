@@ -1,7 +1,7 @@
 {
   "name": "kmb-eta-api",
   "version": "1.0.0",
-  "description": "Headerless browser to get the kmb eta data. Using lambda to handle the google reCAPTCHA limit",
+  "description": "Headless browser to get the kmb eta data. Using lambda to handle the google reCAPTCHA limit",
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
