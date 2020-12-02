@@ -1,4 +1,4 @@
-service: aws-node-puppeteer
+service: kmb-eta-api
 provider:
   name: aws
   stage: dev
@@ -10,17 +10,18 @@ provider:
 
 plugins:
   - serverless-offline
-  - serverless-plugin-chrome
+  # - serverless-plugin-chrome
   
-package:
-  exclude:
-    - node_modules/puppeteer/.local-chromium/**
+# package:
+#   exclude:
+#     - node_modules/puppeteer/.local-chromium/**
 
 functions:
-  hello:
-    handler: handler.hello
+  eta:
+    handler: handler.main
     memorySize: 2048
     timeout: 30
+    layers: arn:aws:lambda:ap-east-1:578332645583:layer:lambda-chrome-layer:1
     events:
       - http:
           path: /

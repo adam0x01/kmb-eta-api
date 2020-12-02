@@ -1,5 +1,5 @@
-const { getChrome } = require("./chrome-script");
-const puppeteer = require('puppeteer');
+// const { getChrome } = require("./chrome-script");
+// const puppeteer = require('puppeteer');
 
 const BASE_URL = `https://search.kmb.hk/kmbwebsite/Function/FunctionRequest.ashx?action=`;
 const URL_MAKER = (action, route, bound, lang) => {
@@ -38,46 +38,111 @@ const getFormBody = (route, bound, seq, bsicode) => {
 
 let page;
 // let browser;
-module.exports.hello = async (event) => {
+
+const chromium = require("chrome-aws-lambda");
+
+exports.main = async (event, context) =>{
   const { route, bound, seq, bsicode } = event.queryStringParameters;
-  const chrome = await getChrome();
-  const browser = await puppeteer.connect({
-    browserWSEndpoint: chrome.endpoint,
-  });
-  page = await browser.newPage();
-  // await page.goto(url, { waitUntil: 'networkidle0' });
 
-  await page.goto("https://search.kmb.hk/KMBWebSite/index.aspx?lang=tc", {
-    waitUntil: "networkidle0",
-  });
+  let result = null;
+  let browser = null;
 
-  // https://44anguoruc.execute-api.ap-east-1.amazonaws.com/dev/?route=280X&bound=2&seq=3&bsicode=NA06-N-1800-0
+  try {
+    browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
 
-  const formBody = getFormBody(route, bound, seq, bsicode);
-  const getEta = async () => {
-    const etaRes = await page.evaluate(async (formBody) => {
-      const _captchaKey = await grecaptcha.execute(recaptchaKey, {
-        action: "get_eta",
-      });
-      const response = await $.post(
-        "/KMBWebSite/Function/FunctionRequest.ashx/?action=get_ETA&lang=1",
-        {
-          captcha: _captchaKey,
-          token: formBody[0],
-          t: formBody[1],
-        }
-      );
-      return response.data;
-    }, formBody);
-    return etaRes;
-  };
+    let page = await browser.newPage();
 
-  const content = await getEta();
+    // await page.goto(event.url || "https://example.com");
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      content,
-    }),
-  };
+    await page.goto("https://search.kmb.hk/KMBWebSite/index.aspx?lang=tc");
+
+    // https://44anguoruc.execute-api.ap-east-1.amazonaws.com/dev/?route=280X&bound=2&seq=3&bsicode=NA06-N-1800-0
+
+    const formBody = getFormBody(route, bound, seq, bsicode);
+
+    const getEta = async () => {
+      const etaRes = await page.evaluate(async (formBody) => {
+        const _captchaKey = await grecaptcha.execute(recaptchaKey, {
+          action: "get_eta",
+        });
+        const response = await $.post(
+          "/KMBWebSite/Function/FunctionRequest.ashx/?action=get_ETA&lang=1",
+          {
+            captcha: _captchaKey,
+            token: formBody[0],
+            t: formBody[1],
+          }
+        );
+        return response.data;
+      }, formBody);
+      return etaRes;
+    };
+
+    const content = await getEta();
+
+
+    result = {
+      statusCode: 200,
+      body: JSON.stringify({
+        content,
+      }),
+    };
+
+  } catch (error) {
+    return error;
+  } finally {
+    if (browser !== null) {
+      await browser.close();
+    }
+  }
+
+  return result
 };
+
+// module.exports.hello = async (event) => {
+//   const { route, bound, seq, bsicode } = event.queryStringParameters;
+//   const chrome = await getChrome();
+//   const browser = await puppeteer.connect({
+//     browserWSEndpoint: chrome.endpoint,
+//   });
+//   page = await browser.newPage();
+//   // await page.goto(url, { waitUntil: 'networkidle0' });
+
+//   await page.goto("https://search.kmb.hk/KMBWebSite/index.aspx?lang=tc");
+
+//   // https://44anguoruc.execute-api.ap-east-1.amazonaws.com/dev/?route=280X&bound=2&seq=3&bsicode=NA06-N-1800-0
+
+//   const formBody = getFormBody(route, bound, seq, bsicode);
+//   const getEta = async () => {
+//     const etaRes = await page.evaluate(async (formBody) => {
+//       const _captchaKey = await grecaptcha.execute(recaptchaKey, {
+//         action: "get_eta",
+//       });
+//       const response = await $.post(
+//         "/KMBWebSite/Function/FunctionRequest.ashx/?action=get_ETA&lang=1",
+//         {
+//           captcha: _captchaKey,
+//           token: formBody[0],
+//           t: formBody[1],
+//         }
+//       );
+//       return response.data;
+//     }, formBody);
+//     return etaRes;
+//   };
+
+//   const content = await getEta();
+
+//   return {
+//     statusCode: 200,
+//     body: JSON.stringify({
+//       content,
+//     }),
+//   };
+// };
