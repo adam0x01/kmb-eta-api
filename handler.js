@@ -1,7 +1,7 @@
-// const { getChrome } = require("./chrome-script");
-// const puppeteer = require('puppeteer');
+const chromium = require("chrome-aws-lambda");
 
 const BASE_URL = `https://search.kmb.hk/kmbwebsite/Function/FunctionRequest.ashx?action=`;
+
 const URL_MAKER = (action, route, bound, lang) => {
   let _url = BASE_URL + action;
 
@@ -39,8 +39,6 @@ const getFormBody = (route, bound, seq, bsicode) => {
 let page;
 // let browser;
 
-const chromium = require("chrome-aws-lambda");
-
 exports.main = async (event, context) =>{
   const { route, bound, seq, bsicode } = event.queryStringParameters;
 
@@ -58,11 +56,7 @@ exports.main = async (event, context) =>{
 
     let page = await browser.newPage();
 
-    // await page.goto(event.url || "https://example.com");
-
     await page.goto("https://search.kmb.hk/KMBWebSite/index.aspx?lang=tc");
-
-    // https://44anguoruc.execute-api.ap-east-1.amazonaws.com/dev/?route=280X&bound=2&seq=3&bsicode=NA06-N-1800-0
 
     const formBody = getFormBody(route, bound, seq, bsicode);
 
