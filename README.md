@@ -15,7 +15,7 @@ sls offline
 ## To Deploy on AWS
 
 ### Prepare the lambda layer
-The `puppeteer` is quite big, the side is more that 262144000 bytes(lambda unzipped size limit).
+The `puppeteer` is too big, the size is more that 262144000 bytes(lambda unzipped size limit).
 `puppeteer-core` is recommended to lambda.
 
 1. Follow the link section to add the lambda layer
